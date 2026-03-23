@@ -1,6 +1,9 @@
 def bubble_sort(arr: list) -> list:
     end = len(arr)
-    while end > 2:
+    if end in [0, 1]:
+        return arr
+
+    while end > 1:
         for i in range(0, end - 1):
             if arr[i] > arr[i + 1]:
                 arr[i], arr[i + 1] = arr[i + 1], arr[i]
