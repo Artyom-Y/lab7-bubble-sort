@@ -11,3 +11,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 23-03-2026 14:41
 - **Prompt**: Can you set yp testing for this app, using basic pytest features and create 5 tests?
 
+### 23-03-2026 14:51
+- **Prompt**: I would like to visualize the sorting as it is happening. First, I would like to explore a terminal based approach. What do you suggest? I think a simple solution would be to switch from return statements to yield, but then we would have to rewrite the tests, so it would be difficult
+
