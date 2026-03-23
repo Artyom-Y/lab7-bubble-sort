@@ -29,3 +29,8 @@
 - **Hook Version**: 1.02
 - **Date**: 23-03-2026 14:51
 - **Prompt**: I would like to visualize the sorting as it is happening. First, I would like to explore a terminal based approach. What do you suggest? I think a simple solution would be to switch from return statements to yield, but then we would have to rewrite the tests, so it would be difficult
+
+### **New Interaction**
+- **Hook Version**: 1.02
+- **Date**: 23-03-2026 15:03
+- **Prompt**: I'm interested in the in-place redraw option. Help me implement this. Create the stubs and todos in main.py. Also, is it possible to create a wrapper function for bubble_sort, to turn it into a generator? We wouldn't change bubble_sort. Instead, if we want to get values one-by-one, we would call the wrapper function. If it's possible, create some stubs for it too (remain in Socratic mode)
