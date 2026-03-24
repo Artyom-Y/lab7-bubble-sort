@@ -12,3 +12,9 @@
 ## 3. Key Learnings
 * **Technical Skills:** What CS concepts or tools did you discover or master during this project?
 * **AI Workflow:** How will you change your use of AI tools in your next project?
+
+## deleteme
+callback vs generator (yield)
+ansi escape code
+CLI parameters for python scripts
+python function attributes vs global variables
