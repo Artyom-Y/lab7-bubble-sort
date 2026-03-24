@@ -1,7 +1,16 @@
 from termcolor import colored
+from random import randint
 import time
+import argparse
+
 
 count = 0
+
+DISPLAY_DELAY = 0.0
+
+STYLE_COLOR = "color"
+STYLE_NONE = "none"
+DEFAULT_STYLE = STYLE_NONE
 
 
 def bubble_sort(arr: list, on_swap=None) -> list:
@@ -38,13 +47,13 @@ def display_swap(arr: list, idx1=None, idx2=None) -> None:
     """
     Display array after a swap.
 
-    TODO: Implement visual display.
-    Consider:
-    - How would you show the current state of arr?
-    - Which elements should be highlighted (idx1, idx2)?
-    - Should you show the pass number or comparison count?
+
     """
     global count
+
+    if DISPLAY_DELAY > 0 and count != 0:
+        time.sleep(DISPLAY_DELAY)
+
     output_arr = arr.copy()
     if idx1 is not None:
         output_arr[idx1] = colored(str(output_arr[idx1]), "yellow")
@@ -55,12 +64,45 @@ def display_swap(arr: list, idx1=None, idx2=None) -> None:
     [print(i, end=" ") for i in output_arr]
     print()
     count += 1
-    time.sleep(1)
+
+
+STYLE_CALLBACKS = {
+    STYLE_COLOR: display_swap,
+    STYLE_NONE: None,
+}
+
+
+def user_input() -> argparse.Namespace:
+    """Parse minimal CLI arguments for sort display style and delay."""
+    parser = argparse.ArgumentParser(description="Bubble sort visualization options")
+    parser.add_argument(
+        "-a",
+        "-array",
+        type=str,
+        default=",".join([str(randint(-10, 10)) for _ in range(5)]),
+        help="Array to sort (separate each value by one comma)",
+    )
+    parser.add_argument(
+        "-s",
+        "--style",
+        choices=STYLE_CALLBACKS,
+        default=DEFAULT_STYLE,
+        help="Display style (which callback bubble_sort should use)",
+    )
+    parser.add_argument(
+        "-d",
+        "--delay",
+        type=float,
+        default=0.0,
+        help="Delay (seconds) before each display print",
+    )
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    # TODO: Test the callback approach
-    # result1 = bubble_sort([5, 2, 8, 6, 6], on_swap=display_swap)
-    # print(result1)
+    args = user_input()
 
-    bubble_sort([5, 2, 8, 6, 6], display_swap)
+    DISPLAY_DELAY = max(0.0, args.delay)
+    array = [int(number) for number in args.a.split(",")]
+    selected_callback = STYLE_CALLBACKS[args.style]
+    bubble_sort(array, selected_callback)

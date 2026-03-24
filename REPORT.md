@@ -18,3 +18,4 @@ callback vs generator (yield)
 ansi escape code
 CLI parameters for python scripts
 python function attributes vs global variables
+AI: STYLE_NONE = none, but color mode was default so it was pointless?
