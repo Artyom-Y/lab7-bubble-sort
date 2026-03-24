@@ -23,3 +23,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 24-03-2026 15:44
 - **Prompt**: Can you explain why did you add #sym:STYLE_NONE, if we never use it? Also, could you give me a very basic overview of pygame? I want to create another .py file with pygame for better visualization. Afterwards, we can import it into main.py and add a new "-s" parameter to represent it
 
+### 24-03-2026 20:19
+- **Prompt**: Can you review my code and provide suggestions? Also, I want to implement my tests using pytest, could you suggest me something?
+
