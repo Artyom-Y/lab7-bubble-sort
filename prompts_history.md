@@ -17,3 +17,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 23-03-2026 15:03
 - **Prompt**: I'm interested in the in-place redraw option. Help me implement this. Create the stubs and todos in main.py. Also, is it possible to create a wrapper function for bubble_sort, to turn it into a generator? We wouldn't change bubble_sort. Instead, if we want to get values one-by-one, we would call the wrapper function. If it's possible, create some stubs for it too (remain in Socratic mode)
 
+### 24-03-2026 15:05
+- **Prompt**: Can you help me create stubs for parsing CLI agruments? I want just two: -s and -d. They stand for style (which on_swap callback will bubble_sort use?) and delay (should we wait in display_swap before printing?) I think we should use argparse for simplicity. Maybe we should declare a user_input() function. Then the question would be where to declare style and delay constants: inside or outside of if __name__ == "__main__" ? Try to be minimalistic
+
