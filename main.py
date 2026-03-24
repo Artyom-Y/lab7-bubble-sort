@@ -2,15 +2,64 @@ from termcolor import colored
 from random import randint
 import time
 import argparse
+import os
 
 
 count = 0
 
-DISPLAY_DELAY = 0.0
+DISPLAY_DELAY = 1
 
 STYLE_COLOR = "color"
+STYLE_BAR = "bar"
 STYLE_NONE = "none"
 DEFAULT_STYLE = STYLE_NONE
+
+
+def cls():
+    """Simple utility function from stack overflow to clear the console on any OS"""
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def parse_input_array(arr):
+    """Function for parsing CLI array input"""
+    parsed = []
+    for el in arr.split(","):
+        el = el.strip()
+        if len(el) == 0:
+            continue  # ignore empties
+        parsed.append(int(el))
+
+    if len(parsed) == 0:
+        raise ValueError("Input array format incorrect :/")
+
+    return parsed
+
+
+def user_input() -> argparse.Namespace:
+    """Parse minimal CLI arguments for sort display style and delay."""
+    parser = argparse.ArgumentParser(description="Bubble sort visualization options")
+    parser.add_argument(
+        "-a",
+        "--array",
+        type=str,
+        default=",".join([str(randint(1, 10)) for _ in range(5)]),
+        help="Array to sort (separate each value by one comma)",
+    )
+    parser.add_argument(
+        "-s",
+        "--style",
+        choices=STYLE_CALLBACKS,
+        default=DEFAULT_STYLE,
+        help="Display style (which callback bubble_sort should use)",
+    )
+    parser.add_argument(
+        "-d",
+        "--delay",
+        type=float,
+        default=1.0,
+        help="Delay (seconds) before each display print",
+    )
+    return parser.parse_args()
 
 
 def bubble_sort(arr: list, on_swap=None) -> list:
@@ -24,8 +73,10 @@ def bubble_sort(arr: list, on_swap=None) -> list:
     Returns:
         Sorted list (same object as input)
     """
-    end = len(arr)
+    global count
     count = 0
+    end = len(arr)
+
     if end in [0, 1]:
         return arr
 
@@ -45,8 +96,15 @@ def bubble_sort(arr: list, on_swap=None) -> list:
 
 def display_swap(arr: list, idx1=None, idx2=None) -> None:
     """
-    Display array after a swap.
+    Display array after a swap with swapped numbers highlighted
 
+    Args:
+        arr: List to display
+        idx1: first swapped number
+        idx2: second swapped number
+
+    Returns:
+        None
 
     """
     global count
@@ -66,43 +124,50 @@ def display_swap(arr: list, idx1=None, idx2=None) -> None:
     count += 1
 
 
+def display_swap_bars(arr: list, idx1=None, idx2=None) -> None:
+    """
+    Display array after a swap with bars representing numbers and
+    clean CLI after each output. For simplicity, the bars represent
+    absolute values of array's elements.
+
+
+    Args:
+        arr: List to display
+        idx1: first swapped number
+        idx2: second swapped number
+
+    Returns:
+        None
+
+    """
+
+    if DISPLAY_DELAY > 0:
+        time.sleep(DISPLAY_DELAY)
+
+    cls()
+
+    output_arr = []
+    for i in range(len(arr)):
+        output_arr.append(f"({arr[i]}) " + "#" * abs(arr[i]))
+        if i == idx1:
+            output_arr[i] = colored(output_arr[i], "yellow")
+        if i == idx2:
+            output_arr[i] = colored(output_arr[i], "red")
+
+    for bar in output_arr:
+        print(bar)
+
+
 STYLE_CALLBACKS = {
     STYLE_COLOR: display_swap,
+    STYLE_BAR: display_swap_bars,
     STYLE_NONE: None,
 }
-
-
-def user_input() -> argparse.Namespace:
-    """Parse minimal CLI arguments for sort display style and delay."""
-    parser = argparse.ArgumentParser(description="Bubble sort visualization options")
-    parser.add_argument(
-        "-a",
-        "-array",
-        type=str,
-        default=",".join([str(randint(-10, 10)) for _ in range(5)]),
-        help="Array to sort (separate each value by one comma)",
-    )
-    parser.add_argument(
-        "-s",
-        "--style",
-        choices=STYLE_CALLBACKS,
-        default=DEFAULT_STYLE,
-        help="Display style (which callback bubble_sort should use)",
-    )
-    parser.add_argument(
-        "-d",
-        "--delay",
-        type=float,
-        default=0.0,
-        help="Delay (seconds) before each display print",
-    )
-    return parser.parse_args()
-
 
 if __name__ == "__main__":
     args = user_input()
 
     DISPLAY_DELAY = max(0.0, args.delay)
-    array = [int(number) for number in args.a.split(",")]
+    array = parse_input_array(args.array)
     selected_callback = STYLE_CALLBACKS[args.style]
     bubble_sort(array, selected_callback)

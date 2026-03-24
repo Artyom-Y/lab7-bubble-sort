@@ -1,0 +1,1 @@
+Note: use "--array= ... " syntax if your array has negative values
