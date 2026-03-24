@@ -20,3 +20,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 24-03-2026 15:05
 - **Prompt**: Can you help me create stubs for parsing CLI agruments? I want just two: -s and -d. They stand for style (which on_swap callback will bubble_sort use?) and delay (should we wait in display_swap before printing?) I think we should use argparse for simplicity. Maybe we should declare a user_input() function. Then the question would be where to declare style and delay constants: inside or outside of if __name__ == "__main__" ? Try to be minimalistic
 
+### 24-03-2026 15:44
+- **Prompt**: Can you explain why did you add #sym:STYLE_NONE, if we never use it? Also, could you give me a very basic overview of pygame? I want to create another .py file with pygame for better visualization. Afterwards, we can import it into main.py and add a new "-s" parameter to represent it
+
