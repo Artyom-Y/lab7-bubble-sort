@@ -20,3 +20,7 @@ CLI parameters for python scripts
 python function attributes vs global variables
 AI: STYLE_NONE = none, but color mode was default so it was pointless?
 pygame basics
+found an issue with AI's thinking? (animation)
+found an unused close_window() function
+
+closing window during execution errors -> i turned off closing during execution

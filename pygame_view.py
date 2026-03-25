@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Iterable
-
+import inspect
 import pygame
 
 
@@ -12,11 +12,12 @@ class ViewConfig:
 
     width: int = 1000
     height: int = 600
-    fps: int = 60
+    fps: int = 20
     margin: int = 40
     background_color: tuple[int, int, int] = (20, 25, 35)
     bar_color: tuple[int, int, int] = (100, 200, 240)
-    active_bar_color: tuple[int, int, int] = (255, 180, 70)
+    swap1_bar_color: tuple[int, int, int] = (255, 233, 70)
+    swap2_bar_color: tuple[int, int, int] = (255, 89, 70)
     axis_color: tuple[int, int, int] = (180, 190, 220)
 
 
@@ -24,6 +25,7 @@ _CONFIG = ViewConfig()
 _SCREEN: pygame.Surface | None = None
 _CLOCK: pygame.time.Clock | None = None
 _IS_OPEN = False
+_IS_PAUSED = False
 
 
 def init_window(config: ViewConfig | None = None) -> None:
@@ -56,11 +58,17 @@ def init_window(config: ViewConfig | None = None) -> None:
 def _handle_events() -> None:
     """Process window events so OS does not mark the app as frozen."""
 
-    global _IS_OPEN
+    global _IS_OPEN, _IS_PAUSED
+    sorting_finished = inspect.stack()[1].function == "wait_until_closed"
 
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT and sorting_finished:
             _IS_OPEN = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                _IS_PAUSED = not _IS_PAUSED
+            if event.key in (pygame.K_ESCAPE, pygame.K_q) and sorting_finished:
+                _IS_OPEN = False
 
 
 def _bar_rects(values: list[int]) -> list[pygame.Rect]:
@@ -120,25 +128,9 @@ def _draw_axes() -> None:
     )
 
 
-# def _draw_bars(values: list[int], highlighted: set[int]) -> None:
-#     """Draw bars and highlight active indices (for compare/swap steps).
-
-#     Args:
-#         values: list of numbers to display as bars
-#         highlighted: numbers to highlight
-#     """
-
-#     if _SCREEN is None:
-#         return
-
-#     for i, rect in enumerate(_bar_rects(values)):
-#         color = _CONFIG.active_bar_color if i in highlighted else _CONFIG.bar_color
-#         pygame.draw.rect(_SCREEN, color, rect)
-
-
 def _draw_bars(
     values: list[int],
-    highlighted: set[int],
+    highlighted: list[int],
     custom_x_positions: dict[int, float] | None = None,
 ) -> None:
     """Draw bars, optionally with custom x positions for animation.
@@ -158,7 +150,14 @@ def _draw_bars(
         if custom_x_positions and i in custom_x_positions:
             rect.x = custom_x_positions[i]
 
-        color = _CONFIG.active_bar_color if i in highlighted else _CONFIG.bar_color
+        if i in highlighted:
+            color = (
+                _CONFIG.swap1_bar_color
+                if i == highlighted[0]
+                else _CONFIG.swap2_bar_color
+            )
+        else:
+            color = _CONFIG.bar_color
         pygame.draw.rect(_SCREEN, color, rect)
 
 
@@ -183,7 +182,7 @@ def _animate_swap(
     if _SCREEN is None or _CLOCK is None:
         return
 
-    highlighted = {idx1, idx2}
+    highlighted = [idx1, idx2]
 
     # Calculate coordinates for bar swapping animation
     normal_rects = _bar_rects(values)
@@ -194,6 +193,13 @@ def _animate_swap(
 
     for k in range(steps):
         _handle_events()
+        if not _IS_OPEN:
+            return
+
+        while _IS_PAUSED and _IS_OPEN:
+            _handle_events()
+            _CLOCK.tick(_CONFIG.fps)
+
         if not _IS_OPEN:
             return
 
@@ -239,10 +245,22 @@ def display_pygame(
     if not _IS_OPEN:
         return
 
+    while _IS_PAUSED and _IS_OPEN:
+        _handle_events()
+
+        _SCREEN.fill(_CONFIG.background_color)
+        _draw_axes()
+        _draw_bars(values, [i for i in (idx1, idx2) if i is not None])
+        pygame.display.flip()
+        _CLOCK.tick(_CONFIG.fps)
+
+    if not _IS_OPEN:
+        return
+
     if idx1 is not None and idx2 is not None:
         _animate_swap(values, idx1, idx2)
 
-    highlighted = {i for i in (idx1, idx2) if i is not None}
+    highlighted = [i for i in (idx1, idx2) if i is not None]
 
     _SCREEN.fill(_CONFIG.background_color)
     _draw_axes()
@@ -251,11 +269,42 @@ def display_pygame(
     _CLOCK.tick(_CONFIG.fps)
 
 
+def wait_until_closed(arr: Iterable[int] | None = None) -> None:
+    """Keep the UI open until user closes it with ESC/Q/window close.
+
+    Args:
+        arr: optional final array snapshot to keep rendered while waiting
+    """
+
+    if not _IS_OPEN:
+        return
+
+    if _SCREEN is None or _CLOCK is None:
+        return
+
+    values = list(arr) if arr is not None else []
+
+    while _IS_OPEN:
+        _handle_events()
+        if not _IS_OPEN:
+            break
+
+        _SCREEN.fill(_CONFIG.background_color)
+        _draw_axes()
+        if values:
+            _draw_bars(values, [])
+        pygame.display.flip()
+        _CLOCK.tick(_CONFIG.fps)
+
+    close_window()
+
+
 def close_window() -> None:
     """Gracefully close pygame resources."""
 
-    global _IS_OPEN
+    global _IS_OPEN, _IS_PAUSED
 
     if _IS_OPEN:
         pygame.quit()
         _IS_OPEN = False
+        _IS_PAUSED = False

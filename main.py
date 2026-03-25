@@ -1,6 +1,6 @@
 from termcolor import colored
 from random import randint
-from pygame_view import display_pygame
+from pygame_view import display_pygame, wait_until_closed
 import time
 import argparse
 import os
@@ -175,3 +175,6 @@ if __name__ == "__main__":
     array = parse_input_array(args.array)
     selected_callback = STYLE_CALLBACKS[args.style]
     bubble_sort(array, selected_callback)
+
+    if args.style == STYLE_UI:
+        wait_until_closed(array)
