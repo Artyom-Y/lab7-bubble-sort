@@ -1,5 +1,6 @@
 from termcolor import colored
 from random import randint
+from pygame_view import display_pygame
 import time
 import argparse
 import os
@@ -11,6 +12,7 @@ DISPLAY_DELAY = 1
 
 STYLE_COLOR = "color"
 STYLE_BAR = "bar"
+STYLE_UI = "ui"
 STYLE_NONE = "none"
 DEFAULT_STYLE = STYLE_NONE
 
@@ -158,9 +160,11 @@ def display_swap_bars(arr: list, idx1=None, idx2=None) -> None:
         print(bar)
 
 
+# i had to put it after function definitions
 STYLE_CALLBACKS = {
     STYLE_COLOR: display_swap,
     STYLE_BAR: display_swap_bars,
+    STYLE_UI: display_pygame,
     STYLE_NONE: None,
 }
 
