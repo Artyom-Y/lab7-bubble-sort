@@ -38,3 +38,6 @@ Automatically captured prompt log. Entries are appended in chronological order (
 ### 25-03-2026 12:57
 - **Prompt**: Two final features I want to implement are pausing and proper quitting. 1. If user presses space key, the animation should pause. 2. The window doesn't close until user presses escape or Q. Please keep changes minimal and provide explanations for your implementation. I'm guessing we'll have to work with #sym:_handle_events for this one, right?
 
+### 25-03-2026 13:27
+- **Prompt**: Why is close_window() never called? Also, is it possible to not close the window the moment array finishes sorting, but wait for user input? I know our app closes the moment #sym:bubble_sort stops calling it, but maybe it could stay in a loop waiting for user to close itafter the execution finishes?  Secondly, could you modify #file:README.md to explain how to use the app? Include overview, installation, CLI parameters. Please, keep my notes that are already there, but feel free to reformat them
+
