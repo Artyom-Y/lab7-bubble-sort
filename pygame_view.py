@@ -12,7 +12,7 @@ class ViewConfig:
 
     width: int = 1000
     height: int = 600
-    fps: int = 30
+    fps: int = 60
     margin: int = 40
     background_color: tuple[int, int, int] = (20, 25, 35)
     bar_color: tuple[int, int, int] = (100, 200, 240)
@@ -31,9 +31,6 @@ def init_window(config: ViewConfig | None = None) -> None:
 
     Args:
         config: None or a ViewConfig class with app parameters
-
-    Returns:
-        None
 
     Stub-friendly behavior:
     - Creates a window and clock.
@@ -123,36 +120,49 @@ def _draw_axes() -> None:
     )
 
 
-def _draw_bars(values: list[int], highlighted: set[int]) -> None:
-    """Draw bars and highlight active indices (for compare/swap steps).
+# def _draw_bars(values: list[int], highlighted: set[int]) -> None:
+#     """Draw bars and highlight active indices (for compare/swap steps).
+
+#     Args:
+#         values: list of numbers to display as bars
+#         highlighted: numbers to highlight
+#     """
+
+#     if _SCREEN is None:
+#         return
+
+#     for i, rect in enumerate(_bar_rects(values)):
+#         color = _CONFIG.active_bar_color if i in highlighted else _CONFIG.bar_color
+#         pygame.draw.rect(_SCREEN, color, rect)
+
+
+def _draw_bars(
+    values: list[int],
+    highlighted: set[int],
+    custom_x_positions: dict[int, float] | None = None,
+) -> None:
+    """Draw bars, optionally with custom x positions for animation.
 
     Args:
-        values: list of numbers to display as bars
-        highlighted: numbers to highlight
-
-    Returns:
-        None
+        values: array of bar heights
+        highlighted: indices to highlight
+        custom_x_positions: dict mapping index -> custom x position (for animation)
     """
-
     if _SCREEN is None:
         return
 
-    for i, rect in enumerate(_bar_rects(values)):
+    all_rects = _bar_rects(values)
+
+    for i, rect in enumerate(all_rects):
+        # If this index has a custom x-position, use it
+        if custom_x_positions and i in custom_x_positions:
+            rect.x = custom_x_positions[i]
+
         color = _CONFIG.active_bar_color if i in highlighted else _CONFIG.bar_color
         pygame.draw.rect(_SCREEN, color, rect)
 
 
-def _render_frame(values: list[int], highlighted: set[int]) -> None:
-    """Update position of bars on screen"""
-
-    _SCREEN.fill(_CONFIG.background_color)
-    _draw_axes()
-    _draw_bars(values, highlighted)
-    pygame.display.flip()
-    _CLOCK.tick(_CONFIG.fps)
-
-
-def _animate_swap_stub(
+def _animate_swap(
     values: list[int],
     idx1: int,
     idx2: int,
@@ -163,9 +173,11 @@ def _animate_swap_stub(
     This is intentionally simple: it just redraws a few frames with both bars
     highlighted before/after the actual data swap in your sorting code.
 
-    TODO for you:
-    - Interpolate X positions between idx1 and idx2 for a smooth crossing.
-    - Move this into a dedicated animation state object.
+    Args:
+        arr: array to display
+        idx2: first swapped index
+        idx1: second swapped index
+        steps: defines amount of animation frames
     """
 
     if _SCREEN is None or _CLOCK is None:
@@ -173,12 +185,29 @@ def _animate_swap_stub(
 
     highlighted = {idx1, idx2}
 
-    for _ in range(steps):
+    # Calculate coordinates for bar swapping animation
+    normal_rects = _bar_rects(values)
+    x1_start = normal_rects[idx1].x
+    x2_start = normal_rects[idx2].x
+    x1_end = normal_rects[idx2].x
+    x2_end = normal_rects[idx1].x
+
+    for k in range(steps):
         _handle_events()
         if not _IS_OPEN:
             return
 
-        _render_frame(values, highlighted)
+        t = k / steps
+        x1_current = x1_start + (x1_end - x1_start) * t
+        x2_current = x2_start + (x2_end - x2_start) * t
+
+        custom_x = {idx1: x1_current, idx2: x2_current}
+
+        _SCREEN.fill(_CONFIG.background_color)
+        _draw_axes()
+        _draw_bars(values, highlighted, custom_x)
+        pygame.display.flip()
+        _CLOCK.tick(_CONFIG.fps)
 
 
 def display_pygame(
@@ -191,6 +220,11 @@ def display_pygame(
     1) call once each compare/swap step
     2) call with idx1/idx2 when those elements are active
     3) after a real swap in data, call again to show the new order
+
+    Args:
+        arr: array to display
+        idx2: first swapped index
+        idx1: second swapped index
     """
 
     if not _IS_OPEN:
@@ -206,11 +240,15 @@ def display_pygame(
         return
 
     if idx1 is not None and idx2 is not None:
-        _animate_swap_stub(values, idx1, idx2)
+        _animate_swap(values, idx1, idx2)
 
     highlighted = {i for i in (idx1, idx2) if i is not None}
 
-    _render_frame(values, highlighted)
+    _SCREEN.fill(_CONFIG.background_color)
+    _draw_axes()
+    _draw_bars(values, highlighted)
+    pygame.display.flip()
+    _CLOCK.tick(_CONFIG.fps)
 
 
 def close_window() -> None:
