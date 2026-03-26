@@ -186,10 +186,10 @@ def _animate_swap(
 
     # Calculate coordinates for bar swapping animation
     normal_rects = _bar_rects(values)
-    x1_start = normal_rects[idx1].x
-    x2_start = normal_rects[idx2].x
-    x1_end = normal_rects[idx2].x
-    x2_end = normal_rects[idx1].x
+    x1_start = normal_rects[idx2].x
+    x2_start = normal_rects[idx1].x
+    x1_end = normal_rects[idx1].x
+    x2_end = normal_rects[idx2].x
 
     for k in range(steps):
         _handle_events()
